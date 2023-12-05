@@ -1,0 +1,88 @@
+:root {
+  --cell-size: 120px;
+  --mark-size: calc(var(--cell-size) * 0.9);
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+/* TicTacToe.css */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.tictactoe {
+  width: 100vw;
+  /* height: 80vh; */
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  justify-items: center;
+  align-items: center;
+  grid-template-columns: repeat(3, auto);
+}
+
+.board-cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  border: 1px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  font-size: var(--mark-size);
+}
+
+.board-cell:first-child,
+.board-cell:nth-child(2),
+.board-cell:nth-child(3) {
+  border-top: none;
+}
+
+.board-cell:nth-child(3n + 1) {
+  border-left: none;
+}
+
+.board-cell:nth-child(3n + 3) {
+  border-right: none;
+}
+
+.board-cell:last-child,
+.board-cell:nth-child(8),
+.board-cell:nth-child(7) {
+  border-bottom: none;
+}
+
+.board-cell.x,
+.board-cell.circle {
+  cursor: not-allowed;
+}
+
+.status {
+  margin: 10px 0;
+  text-align: center;
+}
+
+.restart-btn {
+  margin-top: 10px;
+  padding: 5px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  width: 80px;
+}
