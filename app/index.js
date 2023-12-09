@@ -27,6 +27,7 @@ const messageRouter = require('./routes/messages.routes')
 const authRouter = require('./routes/authRoutes.routes')
 const userRouter = require('./routes/user.routes')
 
+// using session
 app.use(session({
     secret: "1234",
     resave: false,
