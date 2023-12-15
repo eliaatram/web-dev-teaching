@@ -5,16 +5,10 @@ const session = require('express-session')
 
 const app = express()
 const cors = require('cors')
-const PORT = 4500
+const PORT = 8080
 
 try {
-    mongoose.connect('mongodb://127.0.0.1:27018/epita', {
-        authSource: "admin",
-        user: "root",
-        pass: "example",
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    })
+    mongoose.connect('mongodb://127.0.0.1:27017/epita')
     console.log('Connected to database')
 } catch (error) {
     console.log('Error connecting to db' + error)
@@ -26,6 +20,9 @@ const testRouter = require('./routes/test.routes')
 const messageRouter = require('./routes/messages.routes')
 const authRouter = require('./routes/authRoutes.routes')
 const userRouter = require('./routes/user.routes')
+const verifyToken = require('./middleware/authentication')
+
+app.use(verifyToken);
 
 // using session
 app.use(session({
@@ -40,10 +37,7 @@ app.use(session({
 
 app.use(morgan('dev'))
 app.use(express.json())
-app.use(cors({
-    credentials: true,
-    origin: 'http://localhost:3000'
-}))
+app.use(cors())
 
 // Adding routes
 app.use('/todo', todosRouter)
