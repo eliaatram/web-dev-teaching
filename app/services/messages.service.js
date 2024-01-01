@@ -1,53 +1,76 @@
-const express = require('express')
-const messageModel = require('../models/messageModel')
+const messageModel = require("../models/messageModel");
 
 const getMessages = async (req, res) => {
-    messages = await messageModel.find({}).sort({ created_at: 'desc' }).populate('user')
-    return res.status(200).json(messages)
-}
+  const messages = await messageModel
+    .find({})
+    .sort({ created_at: "desc" })
+    .populate("user");
 
-const getMessageByID = async (req, res) => {
-    const { messageId } = req.params
+  return res.status(200).json(messages);
+};
 
-    message = await messageModel.findOne({ _id: messageId })
-    return res.status(200).json(message)
-}
+const getMessageById = async (req, res) => {
+  const { messageId } = req.params;
+  let message;
+
+  try {
+    message = await messageModel.findOne({ _id: messageId });
+  } catch (error) {
+    console.log("Error while getting message by id", error.message);
+    return res.status(500).json({ error: "Error while getting message by id" });
+  }
+
+  return res.status(200).json(message);
+};
 
 const addMessage = async (req, res) => {
-    const { message } = req.body
-    message.user = req.session.user._id
+  const { message } = req.body;
 
-    const messageObj = new messageModel(message)
-    await messageObj.save()
-    return res.status(200).json(messageObj)
+  if (!req.session.user) {
+    return res.status(400).json({ message: "user not found" });
+  }
 
-}
+  message.user = req.session.user._id;
+
+  try {
+    const messageObj = new messageModel(message);
+    await messageObj.save();
+    return res.status(200).json(messageObj);
+  } catch (error) {
+    console.log("Error while saving message in DB", error.message);
+    return res.status(500).json({ error: "Error while adding message" });
+  }
+};
 
 const editMessage = async (req, res) => {
-    const { name } = req.body.message
-    const { messageId } = req.params
+  const { name } = req.body;
+  const { messageId } = req.params;
 
-    const message = await messageModel.findByIdAndUpdate(messageId, {
-        name: name
-    }, {
-        new: true
-    })
+  if (!name || !messageId) {
+    return res.status(400).json({ error: "missing information" });
+  }
 
-    return res.status(200).json(message)
-}
+  try {
+    const message = await messageModel.findByIdAndUpdate(
+      messageId,
+      {
+        name, // this is the equivalent of writing name : name
+      },
+      {
+        new: true,
+      }
+    );
 
-
-const deleteMessage = async (req, res) => {
-    const { messageId } = req.params
-
-    await messageModel.findOneAndDelete({ _id: messageId })
-    return res.status(200).json({ "msg": "Message well deleted !" })
-}
+    return res.status(200).json(message);
+  } catch (error) {
+    console.log("error while editing message", error.message);
+    return res.status(500).json({ error: "error while editing message" });
+  }
+};
 
 module.exports = {
-    getMessages,
-    getMessageByID,
-    addMessage,
-    editMessage,
-    deleteMessage
-}
+  getMessages,
+  getMessageById,
+  addMessage,
+  editMessage,
+};

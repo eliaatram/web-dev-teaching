@@ -1,12 +1,13 @@
-const express = require('express')
-const router = express.Router()
+const express = require("express");
+const router = express.Router();
 
-const messages = require('../services/messages.service')
+const messageServices = require("../services/messages.service");
 
-router.get('/', messages.getMessages)
-router.get('/:messageId', messages.getMessageByID)
-router.post('/add/message', messages.addMessage)
-router.put('/edit/:name', messages.editMessage)
-router.delete('/delete/:name', messages.deleteMessage)
+// routes here
+router.get("/", messageServices.getMessages);
+router.get("/:messageId", messageServices.getMessageById);
+router.post("/add/message", messageServices.addMessage);
+router.put("/edit/:messageId", messageServices.editMessage);
+// router.delete('/delete/:messageId')
 
-module.exports = router
+module.exports = router;

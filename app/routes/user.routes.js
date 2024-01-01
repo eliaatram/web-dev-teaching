@@ -1,8 +1,17 @@
-const express = require('express')
-const router = express.Router()
+const express = require("express");
+const userModel = require("../models/userModel");
+const router = express.Router();
 
-const user = require('../services/user.service')
+router.get("/me", async (req, res) => {
+  if (req.session.user) {
+    const user = await userModel.findById(req.session.user._id, {
+      password: 0,
+    });
 
-router.get('/', user.getUser)
+    if (!user) return res.status(500).json({ error: "user doesn't exist" });
 
-module.exports = router
+    return res.status(200).json(user);
+  }
+});
+
+module.exports = router;

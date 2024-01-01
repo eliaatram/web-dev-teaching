@@ -4,15 +4,16 @@ const badGateway = 502;
 const userAlreadyExists = 409;
 const success = 200;
 const missingParameters = 400;
-const authRequired = 401;
-// const badRequest = 400;
+const unauthorized = 401;
+const badRequest = 400;
 
 module.exports = {
   badGateway,
-  notFound,
   queryError,
+  notFound,
   userAlreadyExists,
   success,
   missingParameters,
-  authRequired,
+  unauthorized,
+  badRequest,
 };

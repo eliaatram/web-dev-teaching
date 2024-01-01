@@ -1,41 +1,42 @@
 const express = require("express");
-const morgan = require("morgan");
+const helmet = require("helmet");
 const mongoose = require("mongoose");
+const morgan = require("morgan");
 const app = express();
-
 const PORT = 8080;
-
-try {
-  mongoose.connect("mongodb://127.0.0.1:27017/epita");
-  console.log("Connected to mongoDB");
-} catch (error) {
-  console.log("Error connecting to db" + error);
-}
 
 // Custom middleware
 const cors = require("cors");
 const session = require("express-session");
-const healthCheck = require("../middleware/healthcheck");
-const notFound = require("../middleware/notfound");
 const logger = require("../middleware/winston");
+const healthcheck = require("../middleware/healthcheck");
+const notFound = require("../middleware/notFound");
+const verifyToken = require("../middleware/authentication");
+const validator = require("../middleware/validator");
 
 // ROUTES
-const todosRouter = require("../routes/todos.routes");
-const testRouter = require("../routes/test.routes");
-const messageRouter = require("../routes/messages.routes");
-const authRouter = require("../routes/authRoutes.routes");
-const userRouter = require("../routes/user.routes");
-const moviesRouter = require("../routes/movies.routes");
+const todoRoutes = require("../routes/todo.routes");
+const authRoutes = require("../routes/auth.routes");
+const userRoutes = require("../routes/user.routes");
+const messageRoutes = require("../routes/messages.routes");
+const moviesRoutes = require("../routes/movies.routes");
 
-// This function is to add all required middleware to the express app
+// mongoDB connection
+try {
+  mongoose.connect("mongodb://localhost:27017/epita");
+  logger.info("Connected to MongoDB");
+} catch (error) {
+  logger.error("Error connecting to MongoDB" + error);
+}
+
+// MIDDLEWARE
 const registerCoreMiddleWare = async () => {
   try {
-    // using session
     app.use(
       session({
         secret: "1234",
-        resave: false,
-        saveUninitialized: true,
+        resave: false, // Forces the session to be saved back to the session store, even if the session was never modified during the request
+        saveUninitialized: true, // Forces a session that is "uninitialized" to be saved to the store. A session is uninitialized when it is new but not modified
         cookie: {
           secure: false,
           httpOnly: true,
@@ -44,18 +45,21 @@ const registerCoreMiddleWare = async () => {
     );
 
     app.use(morgan("combined", { stream: logger.stream }));
-    app.use(express.json());
     app.use(cors());
+    app.use(helmet());
+    app.use(express.json());
 
-    app.use(healthCheck);
+    app.use(validator);
+    app.use(healthcheck);
+    app.use("/auth", authRoutes);
+
+    app.use(verifyToken);
 
     // Route registration
-    app.use("/todo", todosRouter);
-    app.use("/test", testRouter);
-    app.use("/message", messageRouter);
-    app.use("/auth", authRouter);
-    app.use("/user", userRouter);
-    app.use("/movies", moviesRouter);
+    app.use("/todo", todoRoutes);
+    app.use("/user", userRoutes);
+    app.use("/messages", messageRoutes);
+    app.use("/movies", moviesRoutes);
 
     // 404 handling
     app.use(notFound);
@@ -63,18 +67,19 @@ const registerCoreMiddleWare = async () => {
     logger.info("Done registering all middlewares");
   } catch (error) {
     logger.error(
-      "\nError thrown while executing registerCoreMiddleware()\nError:" +
+      "Error thrown while executing registerCoreMiddleWare " +
         JSON.stringify(error, undefined, 2)
     );
   }
 };
 
-// handling error
+// handling uncaught exceptions
 const handleError = () => {
-  //* process is a built in object in node.js
-  // if uncaught exception the execute, note that we can catch uncaught exceptions from the process object
+  // 'process' is a built in object in nodejs
+  // if uncaught execption, then execute this
+  // not that we can catch uncaught exceptions from the process object
   process.on("uncaughtException", (err) => {
-    logger.error(`UNCAUGHT_EXCEPTION OCCURRED : ${JSON.stringify(err.stack)}`);
+    logger.error(`UNCAUGHT_EXCEPTION OCCURED : ${JSON.stringify(err.stack)}`);
     process.exit(1);
   });
 };
@@ -89,11 +94,15 @@ const startApp = async () => {
       logger.info("Server running on http://127.0.0.1:" + PORT);
     });
 
-    // exit on uncaught exception
+    // exit on unchaught exception
     handleError();
   } catch (err) {
     logger.error(
-      `startup :: Error while booting the application : ${JSON.stringify(err)}`
+      `startup :: Error while booting the applicaiton: ${JSON.stringify(
+        err,
+        undefined,
+        2
+      )}`
     );
     throw err;
   }

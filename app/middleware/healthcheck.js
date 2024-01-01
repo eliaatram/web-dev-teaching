@@ -1,12 +1,11 @@
-// this file is for the load balancer to check the health of the API
-const express = require("express");
+// this file can be used for the load balancer or probes for kube/pods
+// to check the health of the API
 
-// Router
-const router = express.Router();
+const router = require("express").Router();
 
 router.get("/api/health", (req, res) => {
   res.status(200).json({
-    msg: "All up and running!!",
+    message: "All up and running!!",
   });
 });
 

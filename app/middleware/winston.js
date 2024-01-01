@@ -6,8 +6,8 @@ const options = {
   file: {
     level: "info",
     filename: `${appRoot}/logs/app.log`,
-    handleExceptions: true,
-    maxsize: 5242880, // 5MB
+    handleException: true,
+    maxSize: 5242880, // 5MB
     maxFiles: 5,
     format: winston.format.combine(
       winston.format.timestamp(),
@@ -16,7 +16,7 @@ const options = {
   },
   console: {
     level: "debug",
-    handleExceptions: true,
+    handleException: true,
     format: winston.format.combine(
       winston.format.colorize(),
       winston.format.simple()
@@ -33,7 +33,7 @@ const logger = winston.createLogger({
   exitOnError: false, // do not exit on handled exceptions
 });
 
-// create a stream object with a 'write' function that will be used by `morgan`
+// create a stream object with a 'write' function that will be used by 'morgan'
 logger.stream = {
   write: function (message, encoding) {
     // use the 'info' log level so the output will be picked up by both
